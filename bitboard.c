@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include "bitboard.h"
+#include <time.h>
+
 
 Bitboard96 newBitboard96() {
     Bitboard96 board;
@@ -35,14 +37,17 @@ int is_bit_set(Bitboard96* board, int index) {
 }
 
 void fill_with_noise(Bitboard96* board) {
-    board->low &= rand();
-    board->high &= rand();
+    srand(time(NULL));
+    board->low |= (uint64_t)rand();
+    board->high |= (uint32_t)rand();
 }
 
 
 void pprint(Bitboard96 board, char symbol, int start, int end, int cols) {
     int row_index = 0;
-    for (int i = start; i <= end; i ++) {
+    printf("%llu\n", board.low);
+    printf("%u\n", board.high);
+    for (int i = start; i < end; i ++) {
         if (is_bit_set(&board, i) == 1) {
             printf(" %c ", symbol);
         } else {
