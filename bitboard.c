@@ -12,22 +12,55 @@ Bitboard96 newBitboard96()
     return board;
 }
 
-Bitboard96 oneHotBitboard96(int hot_index) {
+Bitboard96 oneHotBitboard96(int hot_index)
+{
     Bitboard96 board = newBitboard96();
     set_bit(&board, hot_index);
     return board;
 }
 
-int is_empty(Bitboard96 *bb) {
-    return bb->low == 0 && bb->high ==0;
+int is_empty(Bitboard96 *bb)
+{
+    return bb->low == 0 && bb->high == 0;
 }
 
 Bitboard96 b96_and(Bitboard96 *a, Bitboard96 *b)
 {
     Bitboard96 result;
-    result.high = a->high & b->high;
-    result.low = a->low & b->low;
+    put_b96_and(a, b, &result);
     return result;
+}
+
+Bitboard96 b96_or(Bitboard96 *a, Bitboard96 *b)
+{
+    Bitboard96 result;
+    put_b96_or(a, b, &result);
+    return result;
+}
+
+Bitboard96 b96_not(Bitboard96 *a)
+{
+    Bitboard96 result;
+    put_b96_not(a, &result);
+    return result;
+}
+
+void put_b96_and(Bitboard96 *a, Bitboard96 *b, Bitboard96 *result)
+{
+    result->high = a->high & b->high;
+    result->low = a->low & b->low;
+}
+
+void put_b96_or(Bitboard96 *a, Bitboard96 *b, Bitboard96 *result)
+{
+    result->high = a->high | b->high;
+    result->low = a->low | b->low;
+}
+
+void put_b96_not(Bitboard96 *a, Bitboard96 *result)
+{
+    result->high = ~(a->high);
+    result->low = ~(a->low);
 }
 
 void set_bit(Bitboard96 *board, int index)
@@ -65,7 +98,6 @@ int is_bit_set(Bitboard96 *board, int index)
         return (board->high & (1U << index)) != 0;
     }
 }
-
 
 void fill_with_noise(Bitboard96 *board)
 {
