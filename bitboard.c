@@ -4,60 +4,93 @@
 #include "bitboard.h"
 #include <time.h>
 
-
-Bitboard96 newBitboard96() {
+Bitboard96 newBitboard96()
+{
     Bitboard96 board;
     board.high = 0;
     board.low = 0;
     return board;
 }
 
-void set_bit(Bitboard96* board, int index) {
-    if (index < 64) {
+Bitboard96 oneHotBitboard96(int hot_index) {
+    Bitboard96 board = newBitboard96();
+    set_bit(&board, hot_index);
+    return board;
+}
+
+Bitboard96 b96And(Bitboard96 a, Bitboard96 b)
+{
+    Bitboard96 result;
+    result.high = a.high & b.high;
+    result.low = a.low & b.low;
+    return result;
+}
+
+void set_bit(Bitboard96 *board, int index)
+{
+    if (index < 64)
+    {
         board->low |= (1ULL << index);
-    } else {
+    }
+    else
+    {
         board->high |= (1U << (index - 64));
     }
 }
 
-void clear_bit(Bitboard96* board, int index) {
-    if (index < 64) {
+void clear_bit(Bitboard96 *board, int index)
+{
+    if (index < 64)
+    {
         board->low &= ~(1ULL << index);
-    } else {
+    }
+    else
+    {
         board->high &= ~(1U << (index - 64));
     }
 }
 
-int is_bit_set(Bitboard96* board, int index) {
-    if (index < 64) {
+int is_bit_set(Bitboard96 *board, int index)
+{
+    if (index < 64)
+    {
         return (board->low & (1ULL << index)) != 0;
-    } else {
+    }
+    else
+    {
         return (board->high & (1U << index)) != 0;
     }
 }
 
-void fill_with_noise(Bitboard96* board) {
-    srand(time(NULL));
-    board->low |= (uint64_t)rand();
-    board->high |= (uint32_t)rand();
+
+void fill_with_noise(Bitboard96 *board)
+{
+    // board->low |= (uint64_t)rand();
+    board->low = (uint64_t)rand() << 32 | rand();
+    board->high = (uint32_t)rand();
 }
 
-
-void pprint(Bitboard96 board, char symbol, int start, int end, int cols) {
+void pprint_bitboard96(Bitboard96 board, char symbol, int start, int end, int cols)
+{
     int row_index = 0;
-    printf("%llu\n", board.low);
-    printf("%u\n", board.high);
-    for (int i = start; i < end; i ++) {
-        if (is_bit_set(&board, i) == 1) {
+    for (int i = start; i < end; i++)
+    {
+        if (is_bit_set(&board, i) == 1)
+        {
             printf(" %c ", symbol);
-        } else {
+        }
+        else
+        {
             printf(" _ ");
         }
 
-        if (row_index == cols-1) {
+        if (row_index == cols - 1)
+        {
             printf("\n");
             row_index = 0;
-        } else {
+        }
+        else
+        {
             row_index += 1;
         }
     }

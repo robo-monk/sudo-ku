@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c11
 LDFLAGS =
 
-SOURCES = bitboard.c main.c
+SOURCES = bitboard.c main.c sudoku.c
 OBJECTS = $(SOURCES:.c=.o)
 EXECUTABLE = program
 
