@@ -18,11 +18,15 @@ Bitboard96 oneHotBitboard96(int hot_index) {
     return board;
 }
 
-Bitboard96 b96And(Bitboard96 a, Bitboard96 b)
+int is_empty(Bitboard96 *bb) {
+    return bb->low == 0 && bb->high ==0;
+}
+
+Bitboard96 b96_and(Bitboard96 *a, Bitboard96 *b)
 {
     Bitboard96 result;
-    result.high = a.high & b.high;
-    result.low = a.low & b.low;
+    result.high = a->high & b->high;
+    result.low = a->low & b->low;
     return result;
 }
 

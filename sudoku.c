@@ -4,28 +4,7 @@
 #include "bitboard.h"
 #include "sudoku.h"
 #include <time.h>
-
-void shuffle(Sudoku *sudoku)
-{
-    // for now lets just do a random invalid sudoku state
-    for (int i = 0; i < 9; i++)
-    {
-        fill_with_noise(&sudoku->boards[i]);
-        pprint_bitboard96(sudoku->boards[i], '*', 0, 81, 9);
-        printf("\n");
-    }
-}
-
-Sudoku newSudoku()
-{
-    Sudoku sudoku;
-    for (int i = 0; i < 9; i++)
-    {
-        sudoku.boards[i] = newBitboard96();
-    }
-    shuffle(&sudoku);
-    return sudoku;
-}
+#include <math.h>
 
 Bitboard96 row_bitboard(int row_index)
 {
@@ -39,14 +18,79 @@ Bitboard96 row_bitboard(int row_index)
 
 Bitboard96 col_bitboard(int col_index)
 {
-
     Bitboard96 bb = newBitboard96();
-    for (int i = col_index * 9; i < 81; i+=9)
+    for (int i = col_index * 9; i < 81; i += 9)
     {
         set_bit(&bb, i);
     }
     return bb;
 }
+
+int get_row_from_index(int i)
+{
+    return floor(i / 9);
+}
+
+int get_col_from_index(int i)
+{
+    return i % 9;
+}
+
+void shuffle(Sudoku *sudoku)
+{
+    // for now lets just do a random invalid sudoku state
+    for (int i = 0; i < 9; i++)
+    {
+        // u_int8_t hot_index = rand() % 10;
+        for (int hot_index = 0; hot_index < 81; hot_index++)
+        {
+            Bitboard96 hot_bb = oneHotBitboard96(hot_index);
+
+            int row = get_row_from_index(hot_index);
+            int col = get_col_from_index(hot_index);
+            Bitboard96 _row_bb = row_bitboard(row);
+            Bitboard96 _col_bb = col_bitboard(col);
+
+            Bitboard96 _is_occuppied_bb = b96_and(&hot_bb, &sudoku->empty);
+            Bitboard96 _others_in_row = b96_and(&_row_bb, &sudoku->boards[i]);
+            Bitboard96 _others_in_col = b96_and(&_col_bb, &sudoku->boards[i]);
+            if (
+                is_empty(&_is_occuppied_bb) > 0 &&
+                is_empty(&_others_in_col) > 0 &&
+                is_empty(&_others_in_row))
+            {
+                set_bit(&sudoku->boards[i], hot_index);
+                set_bit(&sudoku->empty, hot_index);
+            }
+        }
+
+        // fill_with_noise(&sudoku->boards[i]);
+        // pprint_bitboard96(sudoku->boards[i], '*', 0, 81, 9);
+        // printf("\n");
+    }
+}
+
+Sudoku newSudoku()
+{
+    Sudoku sudoku;
+    for (int i = 0; i < 9; i++)
+    {
+        sudoku.boards[i] = newBitboard96();
+    }
+    sudoku.empty = newBitboard96();
+    shuffle(&sudoku);
+    return sudoku;
+}
+
+/*
+
+    fill sq x with one:
+        1) square must not be occupied
+            (bb[0] | bb[1] | bb[2])[sq] ... === 0)
+        2) row_bitboard(row_index) & one_bitboard === 0
+        2) col_bitboard(row_index) & col_bitboard === 0
+
+*/
 
 // Bitboard96 ROW_BITBOARDS[] = {
 //     {
