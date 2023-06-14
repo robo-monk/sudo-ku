@@ -45,6 +45,17 @@ Bitboard96 b96_not(Bitboard96 *a)
     return result;
 }
 
+int lowest_bit_set(long long n)
+{
+    return __builtin_ctzll(n);
+}
+
+int index_of_fist_one(Bitboard96 *bb) {
+    int high_index = lowest_bit_set(bb->high);
+    if (high_index > 0 ) return high_index;
+    return lowest_bit_set(bb->low);
+}
+
 void put_b96_and(Bitboard96 *a, Bitboard96 *b, Bitboard96 *result)
 {
     result->high = a->high & b->high;

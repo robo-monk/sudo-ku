@@ -17,4 +17,5 @@ int main() {
 
     Sudoku sudoku = newSudoku();
     pprint_sudoku(sudoku);
+    pprint_bitboard96(sudoku.empty, 'X', 0, 81, 9);
 }
