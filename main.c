@@ -2,7 +2,8 @@
 // #include "bitboard.h"
 #include "sudoku.h"
 
-int main() {
+int main()
+{
     // Bitboard96 board = newBitboard96();
 
     // fill_with_noise(&board);
@@ -17,5 +18,10 @@ int main() {
 
     Sudoku sudoku = newSudoku();
     pprint_sudoku(sudoku);
-    pprint_bitboard96(sudoku.empty, 'X', 0, 81, 9);
+    // pprint_bitboard96(sudoku.empty, 'X', 0, 81, 9);
+
+    Sudoku* solution = solve(&sudoku);
+
+    printf("--> solve return: \n\n");
+    pprint_sudoku(*solution);
 }

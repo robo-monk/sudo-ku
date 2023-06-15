@@ -69,7 +69,7 @@ int highest_set_bit(__int128 num)
     return 127 - position;
 }
 
-int index_of_fist_one(Bitboard96 *bb)
+int index_of_fist_one(Bitboard96 bb)
 {
     return lowest_set_bit(bb);
 }

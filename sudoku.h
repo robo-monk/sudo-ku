@@ -10,7 +10,7 @@ typedef struct {
 } Sudoku;
 
 
-void solve(Sudoku* sudoku);
+Sudoku* solve(Sudoku *sudoku);
 void pprint_sudoku(Sudoku sudoku);
 Sudoku newSudoku();
 
