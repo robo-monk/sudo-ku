@@ -1,6 +1,7 @@
 #include <stdio.h>
 // #include "bitboard.h"
 #include "sudoku.h"
+#include <string.h>
 
 int main()
 {
@@ -17,10 +18,27 @@ int main()
     // pprint_bitboard96(board, '*', 0, 81, 9);
 
     Sudoku sudoku = newSudoku();
+
+    char source[] = "800000000003600000070090200050007000000045700000100030001000068008500010090000400";
+    int len = strlen(source);
+    for (int i = 0; source[i] != 0; i++)
+    {
+        // printf("%c", source[i]);
+        int value = (int)source[i] - 48;
+        if (value > 0) {
+            set_bit(&sudoku.boards[value], i);
+            clear_bit(&sudoku.empty, i);
+        } 
+        // printf("%u\n", );
+        // set_bit(&sudoku.boards[i], i * 9 + i);
+        // clear_bit(&sudoku.empty, i * 9 + i);
+    }
+
     pprint_sudoku(sudoku);
+    // exit(1);
     // pprint_bitboard96(sudoku.empty, 'X', 0, 81, 9);
 
-    Sudoku* solution = solve(&sudoku);
+    Sudoku *solution = solve(&sudoku);
 
     printf("--> solve return: \n\n");
     pprint_sudoku(*solution);

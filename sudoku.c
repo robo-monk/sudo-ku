@@ -221,7 +221,7 @@ Sudoku *_solve(Sudoku *sudoku)
             temp_sudoku.boards[i] |= fill;
             temp_sudoku.empty &= ~fill;
 
-            printf("temp sudoku now: \n") ;
+            printf("temp sudoku now: \n");
             pprint_sudoku(temp_sudoku);
 
             // _fill_matrix >>= (index_of_first_position + 1);
@@ -274,7 +274,7 @@ Sudoku *solve(Sudoku *sudoku)
     pprint_sudoku(*sudoku);
     // printf("-<");
     // sleep(100);
-    // usleep(25*1000);
+    // usleep(5*1000);
 
     if (is_solved(sudoku))
     {
@@ -290,60 +290,60 @@ Sudoku *solve(Sudoku *sudoku)
 
     // int current_index = index_of_first_position;
     int current_index = index_of_first_position;
-    while (~(sudoku->empty) > 0 && current_index >= 0 && current_index < 81)
+    // while (~(sudoku->empty) > 0 && current_index >= 0 && current_index < 81)
+    // {
+    printf("-> current index: %u \n", current_index);
+    // pprint_bitboard81(empty_sq);
+    // printf("-> go in \n");
+    // printf("_fill_matrix is valid! %u", i);
+    // printf("current index: %u", current_index);
+    // pprint_bitboard81(_fill_matrix);
+    // printf("i: %u", index_of_first_position);
+    // Sudoku temp_sudoku = *sudoku;
+
+    // printf("index of first one: %u \n", index_of_first_position);
+
+    // Bitboard96 fill = oneHotBitboard96(current_index);
+
+    for (int N = 0; N < 9; N++)
     {
-        printf("-> current index: %u \n", current_index);
-        // pprint_bitboard81(empty_sq);
-        // printf("-> go in \n");
-        // printf("_fill_matrix is valid! %u", i);
-        // printf("current index: %u", current_index);
-        // pprint_bitboard81(_fill_matrix);
-        // printf("i: %u", index_of_first_position);
-        // Sudoku temp_sudoku = *sudoku;
-
-        // printf("index of first one: %u \n", index_of_first_position);
-
-        // Bitboard96 fill = oneHotBitboard96(current_index);
-
-        for (int N = 0; N < 9; N++)
+        if (can_be_placed(sudoku, current_index, N))
         {
-            if (can_be_placed(sudoku, current_index, N))
+            // place it
+            printf("placing [%u] to [%u]... \n", N + 1, current_index);
+            set_bit(&sudoku->boards[N], current_index);
+            clear_bit(&sudoku->empty, current_index);
+
+            Sudoku temp_sudoku = *sudoku;
+            Sudoku *result = solve(&temp_sudoku);
+            if (result != NULL)
             {
-                // place it
-                printf("placing [%u] to [%u]... \n", N+1, current_index);
-                set_bit(&sudoku->boards[N], current_index);
-                clear_bit(&sudoku->empty, current_index);
-
-                Sudoku temp_sudoku = *sudoku;
-                Sudoku *result = solve(&temp_sudoku);
-                if (result != NULL)
-                {
-                    return result;
-                }
-
-                clear_bit(&sudoku->boards[N], current_index);
-                set_bit(&sudoku->empty, current_index);
+                return result;
             }
+
+            clear_bit(&sudoku->boards[N], current_index);
+            set_bit(&sudoku->empty, current_index);
         }
-        return NULL;
+    }
+    return NULL;
 
-        // empty_sq >>= (index_of_first_position + 1);
-        
-        // empty_sq <<= 1;
+    // empty_sq >>= (index_of_first_position + 1);
 
-        index_of_first_position = index_of_fist_one(sudoku->empty >> (current_index + 1));
-        // printf("indexoffirstpos %u", index_of_first_position);
-        current_index += index_of_first_position + 1;
-        // return NULL;
+    // empty_sq <<= 1;
 
-        // pprint_bitboard81(_fill_matrix);
+    // index_of_first_position = index_of_fist_one(sudoku->empty >> (current_index + 1));
+    // printf("indexoffirstpos %u", index_of_first_position);
+    // current_index += index_of_first_position + 1;
+    // return NULL;
 
-        // printf("[%u] next -> \nfill! current-index: %u\n (index of first position: %u) (_fill_matrix: %llu%016llu)", i, current_index, index_of_first_position, _fill_matrix >> 64, _fill_matrix);
-        // pprint_bitboard81(_og_fill_matrix);
-    };
-    printf("-> NO LUCK");
+    // pprint_bitboard81(_fill_matrix);
+
+    // printf("[%u] next -> \nfill! current-index: %u\n (index of first position: %u) (_fill_matrix: %llu%016llu)", i, current_index, index_of_first_position, _fill_matrix >> 64, _fill_matrix);
+    // pprint_bitboard81(_og_fill_matrix);
+    // };
+    // printf("-> NO LUCK");
     // pprint_sudoku(*sudoku);
-    return sudoku;
+    // return sudoku;
     // return NULL;
 }
 
@@ -356,16 +356,6 @@ Sudoku newSudoku()
     }
 
     sudoku.empty = ~0;
-    set_bit(&sudoku.boards[0], 1);
-    set_bit(&sudoku.boards[2], 3);
-    clear_bit(&sudoku.empty, 1);
-    clear_bit(&sudoku.empty, 3);
-    // for (int i = 0; i < 9; i++)
-    // {
-    //     set_bit(&sudoku.boards[i], i * 9 + i);
-    //     clear_bit(&sudoku.empty, i * 9 + i);
-    // }
-    // sudoku = shuffle(sudoku);
     return sudoku;
 }
 
