@@ -6,9 +6,7 @@
 
 Bitboard96 newBitboard96()
 {
-    Bitboard96 board;
-    board.high = 0;
-    board.low = 0;
+    Bitboard96 board = 0;
     return board;
 }
 
@@ -21,100 +19,81 @@ Bitboard96 oneHotBitboard96(int hot_index)
 
 int is_empty(Bitboard96 *bb)
 {
-    return bb->low == 0 && bb->high == 0;
+    return bb == 0;
+    // return bb->low == 0 && bb->high == 0;
 }
 
-Bitboard96 b96_and(Bitboard96 *a, Bitboard96 *b)
+int lowest_set_bit(__int128 num)
 {
-    Bitboard96 result;
-    put_b96_and(a, b, &result);
-    return result;
+    if (num == 0)
+    {
+        return -1; // No set bits
+    }
+
+    int position = 0;
+    uint64_t highPart = (uint64_t)(num >> 64); // Extract upper 64 bits
+    uint64_t lowPart = (uint64_t)num;          // Extract lower 64 bits
+
+    if (lowPart != 0)
+    {
+        position = __builtin_ctzll(lowPart);
+    }
+    else
+    {
+        position = 64 + __builtin_ctzll(highPart);
+    }
+
+    return position;
 }
 
-Bitboard96 b96_or(Bitboard96 *a, Bitboard96 *b)
+int highest_set_bit(__int128 num)
 {
-    Bitboard96 result;
-    put_b96_or(a, b, &result);
-    return result;
+    if (num == 0)
+    {
+        return -1; // No set bits
+    }
+
+    int position = 0;
+    uint64_t highPart = (uint64_t)(num >> 64); // Extract upper 64 bits
+    uint64_t lowPart = (uint64_t)num;          // Extract lower 64 bits
+
+    if (highPart != 0)
+    {
+        position = 64 + __builtin_clzll(highPart);
+    }
+    else
+    {
+        position = __builtin_clzll(lowPart);
+    }
+
+    return 127 - position;
 }
 
-Bitboard96 b96_not(Bitboard96 *a)
+int index_of_fist_one(Bitboard96 *bb)
 {
-    Bitboard96 result;
-    put_b96_not(a, &result);
-    return result;
-}
-
-int lowest_bit_set(long long n)
-{
-    return __builtin_ctzll(n);
-}
-
-int index_of_fist_one(Bitboard96 *bb) {
-    int high_index = lowest_bit_set(bb->high);
-    if (high_index > 0 ) return high_index;
-    return lowest_bit_set(bb->low);
-}
-
-void put_b96_and(Bitboard96 *a, Bitboard96 *b, Bitboard96 *result)
-{
-    result->high = a->high & b->high;
-    result->low = a->low & b->low;
-}
-
-void put_b96_or(Bitboard96 *a, Bitboard96 *b, Bitboard96 *result)
-{
-    result->high = a->high | b->high;
-    result->low = a->low | b->low;
-}
-
-void put_b96_not(Bitboard96 *a, Bitboard96 *result)
-{
-    result->high = ~(a->high);
-    result->low = ~(a->low);
+    return lowest_set_bit(bb);
 }
 
 void set_bit(Bitboard96 *board, int index)
 {
-    if (index < 64)
-    {
-        board->low |= (1ULL << index);
-    }
-    else
-    {
-        board->high |= (1U << (index - 64));
-    }
+    *board |= (__int128_t)1 << index;
 }
 
 void clear_bit(Bitboard96 *board, int index)
 {
-    if (index < 64)
-    {
-        board->low &= ~(1ULL << index);
-    }
-    else
-    {
-        board->high &= ~(1U << (index - 64));
-    }
+
+    *board &= ~((__int128_t)1 << index);
 }
 
 int is_bit_set(Bitboard96 *board, int index)
 {
-    if (index < 64)
-    {
-        return (board->low & (1ULL << index)) != 0;
-    }
-    else
-    {
-        return (board->high & (1U << index)) != 0;
-    }
+    return (*board & ((__int128_t)1 << index)) != 0;
 }
 
 void fill_with_noise(Bitboard96 *board)
 {
-    // board->low |= (uint64_t)rand();
-    board->low = (uint64_t)rand() << 32 | rand();
-    board->high = (uint32_t)rand();
+    // TODO implement
+    board = (__int128_t)rand() << 32 | rand();
 }
 
 void pprint_bitboard96(Bitboard96 board, char symbol, int start, int end, int cols)

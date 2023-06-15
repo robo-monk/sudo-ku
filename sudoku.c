@@ -43,19 +43,57 @@ int get_col_from_index(int i)
     return i % 9;
 }
 
+int count_zeros(Bitboard96 num)
+{
+    int count = 0;
+    __int128 mask = 1;
+
+    while (num != 0)
+    {
+        if ((num & mask) == 0)
+        {
+            count++;
+        }
+        num >>= 1;
+    }
+
+    return count;
+}
+
+int count_ones(__int128 num)
+{
+    int count = 0;
+    __int128 mask = 1;
+
+    while (num != 0)
+    {
+        if ((num & mask) != 0)
+        {
+            count++;
+        }
+        num >>= 1;
+    }
+
+    return count;
+}
+
 Bitboard96 get_available_rows(Bitboard96 *bb)
 {
-    Bitboard96 result;
+    Bitboard96 result = 0;
     for (int i = 0; i < 9; i++)
     {
         Bitboard96 _row_bb = row_bitboard(i);
-        Bitboard96 not_bb = b96_not(bb);
-        Bitboard96 available = b96_and(&_row_bb, &not_bb);
+
+        // printf("for row %u \n", i);
+        // pprint_bitboard81(_row_bb);
+        Bitboard96 available = _row_bb & *bb;
+        if (count_ones(available) == 9)
+        {
+            // printf("available to place at row %u ()", 8);
+            result |= available;
+        }
+        // printf("zeors %u", count_ones(available));
         // pprint_bitboard81(available);
-        put_b96_or(
-            &available,
-            &result,
-            &result);
     }
 
     return result;
@@ -63,17 +101,19 @@ Bitboard96 get_available_rows(Bitboard96 *bb)
 
 Bitboard96 get_available_cols(Bitboard96 *bb)
 {
-    Bitboard96 result;
+    Bitboard96 result = 0;
     for (int i = 0; i < 9; i++)
     {
-        Bitboard96 _row_bb = col_bitboard(i);
-        Bitboard96 not_bb = b96_not(bb);
-        Bitboard96 available = b96_and(&_row_bb, &not_bb);
+
+        // printf("for col %u \n", i);
+        Bitboard96 _col_bb = col_bitboard(i);
+        Bitboard96 available = _col_bb & *bb;
+
         // pprint_bitboard81(available);
-        put_b96_or(
-            &available,
-            &result,
-            &result);
+        if (count_ones(available) == 9)
+        {
+            result |= available;
+        }
     }
 
     return result;
@@ -82,7 +122,7 @@ Bitboard96 get_available_cols(Bitboard96 *bb)
 void shuffle(Sudoku *sudoku)
 {
     // for now lets just do a random invalid sudoku state
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 9; i++)
     {
         // u_int8_t hot_index = rand() % 10;
         // for (int hot_index = 0; hot_index < 12; hot_index++)
@@ -98,39 +138,38 @@ void shuffle(Sudoku *sudoku)
 
         printf("for %u \n", i);
         // Bitboard96 _not_squares = b96_not(&sudoku->boards[i]);
-        Bitboard96 _available_squares = b96_or(&sudoku->boards[i], &sudoku->empty);
-        pprint_bitboard81(sudoku->boards[i]);
+        Bitboard96 _available_squares = ~(sudoku->boards[i]);
+        // pprint_bitboard81(_available_squares);
+        // printf("empties: \n");
+        // pprint_bitboard81(sudoku->empty);
         Bitboard96 _available_in_row = get_available_rows(&_available_squares);
-        // pprint_bitboard81(_available_in_row);
+        printf("row mask: \n");
+        pprint_bitboard81(_available_in_row);
 
         // pprint_bitboard81(_available_in_row);
         Bitboard96 _available_in_col = get_available_cols(&_available_squares);
+        printf("col mask: \n");
+        pprint_bitboard81(_available_in_col);
+
+
         // pprint_bitboard81(_available_in_col);
-        Bitboard96 _fill_matrix = b96_and(&_available_in_row, &_available_in_col);
+        Bitboard96 _fill_matrix = _available_in_row & _available_in_col & sudoku->empty;
+        printf("fill matrix: \n");
+        pprint_bitboard81(_fill_matrix);
 
         // pprint_bitboard96(_fill_matrix, '*', 0, 96, 8);
-        int index_of_first_position = index_of_fist_one(&_fill_matrix);
-        // printf("%u \n", index_of_first_position);
+        int index_of_first_position = index_of_fist_one(_fill_matrix);
+        printf("index of first one: %u \n", index_of_first_position);
 
         Bitboard96 fill = oneHotBitboard96(index_of_first_position);
-        Bitboard96 _fill = b96_or(&fill, &sudoku->boards[i]);
-        put_b96_and(&_fill, &sudoku->empty, &sudoku->boards[i]);
-        // Bitboard96 _not_fill = b96_not(&_fill);
-        // Bitboard96 _emty = b96_or(&_fill, &sudoku->empty);
-        // if fill and empty -> 0
-        put_b96_and(&_fill, &sudoku->empty, &sudoku->empty);
-        // put_b96_and(&_not_fill, &sudoku->empty, &sudoku->empty);
-        put_b96_not(&_fill, &sudoku->empty);
-        // clear_bit(&sudoku->empty, index_of_first_position);
-        // if (
-        //     is_empty(&_is_occuppied_bb) > 0 &&
-        //     is_empty(&_others_in_col) > 0 &&
-        //     is_empty(&_others_in_row) > 0)
-        // {
-        //     set_bit(&sudoku->boards[i], hot_index);
-        //     set_bit(&sudoku->empty, hot_index);
-        // }
-        // }
+
+        printf("fill matrix: \n");
+        pprint_bitboard81(fill);
+        Bitboard96 _fill = fill | sudoku->boards[i];
+        // put_b96_and(&_fill, &sudoku->empty, &sudoku->boards[i]);
+        sudoku->boards[i] |= _fill;
+        sudoku->empty &= ~_fill;
+        // sudoku->empty = ~_fill;
 
         // fill_with_noise(&sudoku->boards[i]);
         // pprint_bitboard96(sudoku->boards[i], '*', 0, 81, 9);
@@ -150,14 +189,13 @@ Sudoku newSudoku()
         sudoku.boards[i] = newBitboard96();
     }
 
-    Bitboard96 empty = {0xFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
-    sudoku.empty = empty;
+    sudoku.empty = ~0;
     for (int i = 0; i < 9; i++)
     {
         set_bit(&sudoku.boards[i], i * 9 + i);
         clear_bit(&sudoku.empty, i * 9 + i);
     }
-    // shuffle(&sudoku);
+    shuffle(&sudoku);
     return sudoku;
 }
 
