@@ -4,7 +4,8 @@ LDFLAGS =
 
 SOURCES = bitboard.c main.c sudoku.c
 OBJECTS = $(SOURCES:.c=.o)
-EXECUTABLE = program
+OUTPUT_DIR = bin
+EXECUTABLE = $(OUTPUT_DIR)/sudo-ku
 
 .PHONY: all clean
 

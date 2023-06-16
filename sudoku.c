@@ -7,6 +7,7 @@
 #include <math.h>
 #include <unistd.h>
 
+// move to bitboard.c
 void pprint_bitboard81(Bitboard96 bb)
 {
     printf("\n");
@@ -65,6 +66,7 @@ int get_col_from_index(int i)
     return i % 9;
 }
 
+// TODO: move to bitboard.c
 int count_ones(__int128 num)
 {
     int count = 0;
@@ -332,33 +334,33 @@ int solve(Sudoku *sudoku)
     // {
     //     int current_index = _i;
     //     if (is_bit_set(&sudoku->empty, _i))
-        // {
-            for (int N = 0; N < 9; N++)
+    // {
+    for (int N = 0; N < 9; N++)
+    {
+        if (can_be_placed(sudoku, current_index, N))
+        {
+            // place it
+            // printf("placing [%u] to [%u]... \n", N + 1, current_index);
+            set_bit(&sudoku->boards[N], current_index);
+            clear_bit(&sudoku->empty, current_index);
+
+            // Sudoku temp_sudoku = *sudoku;
+            // int solved = solve(&temp_sudoku);
+            int solved = solve(sudoku);
+            // *sudoku = temp_sudoku;
+            if (solved)
             {
-                if (can_be_placed(sudoku, current_index, N))
-                {
-                    // place it
-                    // printf("placing [%u] to [%u]... \n", N + 1, current_index);
-                    set_bit(&sudoku->boards[N], current_index);
-                    clear_bit(&sudoku->empty, current_index);
-
-                    // Sudoku temp_sudoku = *sudoku;
-                    // int solved = solve(&temp_sudoku);
-                    int solved = solve(sudoku);
-                    // *sudoku = temp_sudoku;
-                    if (solved)
-                    {
-                        // printf("im in here");
-                        // pprint_sudoku(*result);
-                        return 1;
-                    }
-
-                    clear_bit(&sudoku->boards[N], current_index);
-                    set_bit(&sudoku->empty, current_index);
-                }
+                // printf("im in here");
+                // pprint_sudoku(*result);
+                return 1;
             }
-            return 0;
-        // }
+
+            clear_bit(&sudoku->boards[N], current_index);
+            set_bit(&sudoku->empty, current_index);
+        }
+    }
+    return 0;
+    // }
     // }
     return 0;
 
