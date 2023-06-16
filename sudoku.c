@@ -65,36 +65,14 @@ int get_col_from_index(int i)
     return i % 9;
 }
 
-int count_zeros(Bitboard96 num)
-{
-    int count = 0;
-    __int128 mask = ~0;
-
-    while (num > 0)
-    {
-        if ((num & mask) == 0)
-        {
-            count++;
-        }
-        num >>= 1;
-        // printf("%u\n", count);
-    }
-
-    return count;
-}
-
 int count_ones(__int128 num)
 {
     int count = 0;
-    __int128 mask = 1;
 
     while (num > 0)
     {
-        if ((num & mask) != 0)
-        {
-            count++;
-        }
-        num >>= 1;
+        count += __builtin_popcountll((uint64_t)num);
+        num >>= 64;
     }
 
     return count;
@@ -334,8 +312,8 @@ int solve(Sudoku *sudoku)
     int index_of_first_position = index_of_fist_one(sudoku->empty);
     // printf("INDEX OF FIRST POS: %u\n", index_of_first_position);
 
-    // int current_index = index_of_first_position;
     int current_index = index_of_first_position;
+    // int current_index = index_of_first_position;
     // while (~(sudoku->empty) > 0 && current_index >= 0 && current_index < 81)
     // {
     // printf("-> current index: %u \n", current_index);
@@ -350,10 +328,11 @@ int solve(Sudoku *sudoku)
     // printf("index of first one: %u \n", index_of_first_position);
 
     // Bitboard96 fill = oneHotBitboard96(current_index);
-    for (int _i = 0; _i < 81; _i++)
-    {
-        if (is_bit_set(&sudoku->empty, _i))
-        {
+    // for (int _i = 0; _i < 81; _i++)
+    // {
+    //     int current_index = _i;
+    //     if (is_bit_set(&sudoku->empty, _i))
+        // {
             for (int N = 0; N < 9; N++)
             {
                 if (can_be_placed(sudoku, current_index, N))
@@ -363,9 +342,10 @@ int solve(Sudoku *sudoku)
                     set_bit(&sudoku->boards[N], current_index);
                     clear_bit(&sudoku->empty, current_index);
 
-                    Sudoku temp_sudoku = *sudoku;
-                    int solved = solve(&temp_sudoku);
-                    *sudoku = temp_sudoku;
+                    // Sudoku temp_sudoku = *sudoku;
+                    // int solved = solve(&temp_sudoku);
+                    int solved = solve(sudoku);
+                    // *sudoku = temp_sudoku;
                     if (solved)
                     {
                         // printf("im in here");
@@ -378,8 +358,8 @@ int solve(Sudoku *sudoku)
                 }
             }
             return 0;
-        }
-    }
+        // }
+    // }
     return 0;
 
     // empty_sq >>= (index_of_first_position + 1);
