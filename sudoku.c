@@ -291,9 +291,9 @@ int can_be_placed(Sudoku *sudoku, int index, int N)
     return _fill_matrix != 0;
 }
 
-Sudoku *solve(Sudoku *sudoku)
+int solve(Sudoku *sudoku)
 {
-    // pprint_sudoku(*sudoku);
+    pprint_sudoku(*sudoku);
     // printf("-<");
     // sleep(100);
     // usleep(5*1000);
@@ -304,7 +304,8 @@ Sudoku *solve(Sudoku *sudoku)
     {
         printf("\n\n!!!!!!!!!!!!!! solved!!!\n\n");
         pprint_sudoku(*sudoku);
-        return sudoku;
+        // return sudoku;
+        return 1;
     }
 
     // Bitboard96 empty_sq = sudoku->empty;
@@ -337,28 +338,28 @@ Sudoku *solve(Sudoku *sudoku)
                 if (can_be_placed(sudoku, current_index, N))
                 {
                     // place it
-                    // printf("placing [%u] to [%u]... \n", N + 1, current_index);
+                    printf("placing [%u] to [%u]... \n", N + 1, current_index);
                     set_bit(&sudoku->boards[N], current_index);
                     clear_bit(&sudoku->empty, current_index);
 
                     Sudoku temp_sudoku = *sudoku;
-                    Sudoku *result = solve(&temp_sudoku);
-
-                    if (*result != NULL)
+                    int solved = solve(&temp_sudoku);
+                    *sudoku = temp_sudoku;
+                    if (solved)
                     {
                         printf("im in here");
                         // pprint_sudoku(*result);
-                        return result;
+                        return 1;
                     }
 
                     clear_bit(&sudoku->boards[N], current_index);
                     set_bit(&sudoku->empty, current_index);
                 }
             }
-            return NULL;
+            return 0;
         }
     }
-    return NULL;
+    return 0;
 
     // empty_sq >>= (index_of_first_position + 1);
 

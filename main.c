@@ -19,12 +19,12 @@ int main()
 
     Sudoku sudoku = newSudoku();
 
-    char source[] = "800000000003600000070090200050007000000045700000100030001000068008500010090000400";
-    // char source[] = "316578492529134768487629531263415987974863125851792643138947256692351874745286319";
+    // char source[] = "800000000003600000070090200050007000000045700000100030001000068008500010090000400";
+    char source[] = "300000000500000700007029501200005080900860100850000043000047050692351070705000019";
     int len = strlen(source);
     for (int i = 0; source[i] != 0; i++)
     {
-        break;
+        // break;
         // printf("%c", source[i]);
         int value = (int)source[i] - 48;
         if (value > 0) {
@@ -40,8 +40,8 @@ int main()
     // exit(1);
     // pprint_bitboard96(sudoku.empty, 'X', 0, 81, 9);
 
-    Sudoku *solution = solve(&sudoku);
+    solve(&sudoku);
 
     printf("--> solve return: \n\n");
-    pprint_sudoku(*solution);
+    pprint_sudoku(sudoku);
 }
