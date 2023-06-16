@@ -121,10 +121,32 @@ Bitboard96 get_available_cols(Bitboard96 *bb)
     return result;
 }
 
+int countOnes(__int128 value)
+{
+    int count = 0;
+
+    // Iterate over each bit
+    for (int i = 0; i < 128; i++)
+    {
+        // Check if the bit is set
+        if ((value & ((__int128)1 << i)) != 0)
+        {
+            count++;
+        }
+    }
+
+    return count;
+}
+
 int is_solved(Sudoku *sudoku)
 {
-    pprint_bitboard81(sudoku->empty);
-    if (~sudoku->empty == (__int128_t)0)
+    // printf("is solved?");
+    // pprint_bitboard81(sudoku->empty);
+    // printf("size of %zu", 8 * sizeof(sudoku->empty));
+    // printf("size of %zu", 8 * sizeof((__int128_t)0));
+    // printf("count ones in empty: %u", countOnes(sudoku->empty));
+    // exit(0);
+    if ((sudoku->empty) == 0)
     {
         printf("!!! SOLVED!");
         return 1;
@@ -271,14 +293,16 @@ int can_be_placed(Sudoku *sudoku, int index, int N)
 
 Sudoku *solve(Sudoku *sudoku)
 {
-    pprint_sudoku(*sudoku);
+    // pprint_sudoku(*sudoku);
     // printf("-<");
     // sleep(100);
     // usleep(5*1000);
 
+    // pprint_sudoku(*sudoku);
+
     if (is_solved(sudoku))
     {
-        printf("\n\n!! solved!!!\n\n");
+        printf("\n\n!!!!!!!!!!!!!! solved!!!\n\n");
         pprint_sudoku(*sudoku);
         return sudoku;
     }
@@ -286,13 +310,13 @@ Sudoku *solve(Sudoku *sudoku)
     // Bitboard96 empty_sq = sudoku->empty;
 
     int index_of_first_position = index_of_fist_one(sudoku->empty);
-    printf("INDEX OF FIRST POS: %u\n", index_of_first_position);
+    // printf("INDEX OF FIRST POS: %u\n", index_of_first_position);
 
     // int current_index = index_of_first_position;
     int current_index = index_of_first_position;
     // while (~(sudoku->empty) > 0 && current_index >= 0 && current_index < 81)
     // {
-    printf("-> current index: %u \n", current_index);
+    // printf("-> current index: %u \n", current_index);
     // pprint_bitboard81(empty_sq);
     // printf("-> go in \n");
     // printf("_fill_matrix is valid! %u", i);
@@ -304,25 +328,34 @@ Sudoku *solve(Sudoku *sudoku)
     // printf("index of first one: %u \n", index_of_first_position);
 
     // Bitboard96 fill = oneHotBitboard96(current_index);
-
-    for (int N = 0; N < 9; N++)
+    for (int _i = 0; _i < 81; _i++)
     {
-        if (can_be_placed(sudoku, current_index, N))
+        if (is_bit_set(&sudoku->empty, _i))
         {
-            // place it
-            printf("placing [%u] to [%u]... \n", N + 1, current_index);
-            set_bit(&sudoku->boards[N], current_index);
-            clear_bit(&sudoku->empty, current_index);
-
-            Sudoku temp_sudoku = *sudoku;
-            Sudoku *result = solve(&temp_sudoku);
-            if (result != NULL)
+            for (int N = 0; N < 9; N++)
             {
-                return result;
-            }
+                if (can_be_placed(sudoku, current_index, N))
+                {
+                    // place it
+                    // printf("placing [%u] to [%u]... \n", N + 1, current_index);
+                    set_bit(&sudoku->boards[N], current_index);
+                    clear_bit(&sudoku->empty, current_index);
 
-            clear_bit(&sudoku->boards[N], current_index);
-            set_bit(&sudoku->empty, current_index);
+                    Sudoku temp_sudoku = *sudoku;
+                    Sudoku *result = solve(&temp_sudoku);
+
+                    if (*result != NULL)
+                    {
+                        printf("im in here");
+                        // pprint_sudoku(*result);
+                        return result;
+                    }
+
+                    clear_bit(&sudoku->boards[N], current_index);
+                    set_bit(&sudoku->empty, current_index);
+                }
+            }
+            return NULL;
         }
     }
     return NULL;
@@ -355,7 +388,12 @@ Sudoku newSudoku()
         sudoku.boards[i] = newBitboard96();
     }
 
-    sudoku.empty = ~0;
+    sudoku.empty = (__int128_t)0;
+    for (int i = 0; i < 81; i++)
+    {
+        set_bit(&sudoku.empty, i);
+    }
+
     return sudoku;
 }
 

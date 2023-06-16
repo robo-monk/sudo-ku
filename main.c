@@ -20,13 +20,15 @@ int main()
     Sudoku sudoku = newSudoku();
 
     char source[] = "800000000003600000070090200050007000000045700000100030001000068008500010090000400";
+    // char source[] = "316578492529134768487629531263415987974863125851792643138947256692351874745286319";
     int len = strlen(source);
     for (int i = 0; source[i] != 0; i++)
     {
+        break;
         // printf("%c", source[i]);
         int value = (int)source[i] - 48;
         if (value > 0) {
-            set_bit(&sudoku.boards[value], i);
+            set_bit(&sudoku.boards[value-1], i);
             clear_bit(&sudoku.empty, i);
         } 
         // printf("%u\n", );
