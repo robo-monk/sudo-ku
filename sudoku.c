@@ -14,7 +14,19 @@ void pprint_bitboard81(Bitboard96 bb)
     printf("\n");
 }
 
+static Bitboard96 cachedRowBitboards[9];
+static Bitboard96 cachedColBitboards[9];
+
 Bitboard96 row_bitboard(int row_index)
+{
+    return cachedRowBitboards[row_index];
+}
+Bitboard96 col_bitboard(int col_index)
+{
+    return cachedColBitboards[col_index];
+}
+
+Bitboard96 _row_bitboard(int row_index)
 {
     Bitboard96 bb = newBitboard96();
     for (int i = row_index * 9; i < (row_index + 1) * 9; i++)
@@ -24,7 +36,7 @@ Bitboard96 row_bitboard(int row_index)
     return bb;
 }
 
-Bitboard96 col_bitboard(int col_index)
+Bitboard96 _col_bitboard(int col_index)
 {
     Bitboard96 bb = newBitboard96();
     for (int i = col_index; i < 81; i += 9)
@@ -32,6 +44,15 @@ Bitboard96 col_bitboard(int col_index)
         set_bit(&bb, i);
     }
     return bb;
+}
+
+void initializeCache()
+{
+    for (int i = 0; i < 9; i++)
+    {
+        cachedRowBitboards[i] = _row_bitboard(i);
+        cachedColBitboards[i] = _col_bitboard(i);
+    }
 }
 
 int get_row_from_index(int i)
@@ -293,7 +314,7 @@ int can_be_placed(Sudoku *sudoku, int index, int N)
 
 int solve(Sudoku *sudoku)
 {
-    pprint_sudoku(*sudoku);
+    // pprint_sudoku(*sudoku);
     // printf("-<");
     // sleep(100);
     // usleep(5*1000);
@@ -338,7 +359,7 @@ int solve(Sudoku *sudoku)
                 if (can_be_placed(sudoku, current_index, N))
                 {
                     // place it
-                    printf("placing [%u] to [%u]... \n", N + 1, current_index);
+                    // printf("placing [%u] to [%u]... \n", N + 1, current_index);
                     set_bit(&sudoku->boards[N], current_index);
                     clear_bit(&sudoku->empty, current_index);
 
@@ -347,7 +368,7 @@ int solve(Sudoku *sudoku)
                     *sudoku = temp_sudoku;
                     if (solved)
                     {
-                        printf("im in here");
+                        // printf("im in here");
                         // pprint_sudoku(*result);
                         return 1;
                     }
@@ -383,6 +404,7 @@ int solve(Sudoku *sudoku)
 
 Sudoku newSudoku()
 {
+    initializeCache();
     Sudoku sudoku;
     for (int i = 0; i < 9; i++)
     {
