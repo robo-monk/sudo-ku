@@ -20,7 +20,6 @@ Bitboard96 oneHotBitboard96(int hot_index)
 int is_empty(Bitboard96 *bb)
 {
     return bb == 0;
-    // return bb->low == 0 && bb->high == 0;
 }
 
 int lowest_set_bit(__int128 num)
@@ -94,6 +93,19 @@ void fill_with_noise(Bitboard96 *board)
 {
     // TODO implement
     board = (__int128_t)rand() << 32 | rand();
+}
+
+int count_ones(Bitboard96 num)
+{
+    int count = 0;
+
+    while (num > 0)
+    {
+        count += __builtin_popcountll((uint64_t)num);
+        num >>= 64;
+    }
+
+    return count;
 }
 
 void pprint_bitboard96(Bitboard96 board, char symbol, int start, int end, int cols)

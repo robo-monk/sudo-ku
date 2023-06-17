@@ -12,6 +12,7 @@ void pprint_bitboard96(Bitboard96 board, char symbol, int start, int end, int co
 void fill_with_noise(Bitboard96 *board);
 int is_empty(Bitboard96 *board);
 int index_of_fist_one(Bitboard96 bb);
+int count_ones(Bitboard96 num);
 
 Bitboard96 newBitboard96();
 Bitboard96 oneHotBitboard96(int hot_index);
