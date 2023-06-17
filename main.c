@@ -49,7 +49,7 @@ int main()
         // clear_bit(&sudoku.empty, i * 9 + i);
     }
 
-    return 1;
+    // return 1;
     pprint_sudoku(sudoku);
     // exit(1);
     // pprint_bitboard96(sudoku.empty, 'X', 0, 81, 9);

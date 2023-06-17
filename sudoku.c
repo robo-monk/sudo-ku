@@ -90,8 +90,8 @@ void initializeCache()
         cachedRowBitboards[i] = _row_bitboard(i);
         cachedColBitboards[i] = _col_bitboard(i);
         cachedSubsquareBitboards[i] = _subsquare_bitboard(i);
-        printf("- subgrid: %u -\n", i);
-        pprint_bitboard81(_subsquare_bitboard(i));
+        // printf("- subgrid: %u -\n", i);
+        // pprint_bitboard81(_subsquare_bitboard(i));
     }
 }
 
@@ -151,6 +151,26 @@ Bitboard96 get_available_cols(Bitboard96 *bb)
     }
 
     return result;
+}
+
+Bitboard96 get_available_subsquares(Bitboard96 *bb) {
+    Bitboard96 result = 0;
+    for (int i = 0; i < 9; i++)
+    {
+
+        // printf("for col %u \n", i);
+        Bitboard96 _subsquare_bb = subsquare_bitboard(i);
+        Bitboard96 available = _subsquare_bb & *bb;
+
+        // pprint_bitboard81(available);
+        if (count_ones(available) == 9)
+        {
+            result |= available;
+        }
+    }
+
+    return result;
+
 }
 
 int countOnes(__int128 value)
@@ -316,9 +336,11 @@ int can_be_placed(Sudoku *sudoku, int index, int N)
     // printf("col mask: \n");
     // pprint_bitboard81(_available_in_col);
 
+    Bitboard96 _available_in_subsquare = get_available_subsquares(&_available_squares);
+
     // pprint_bitboard81(_available_in_col);
     // Bitboard96 _fill_matrix = _available_in_row & _available_in_col & sudoku->empty;
-    Bitboard96 _fill_matrix = _available_in_row & _available_in_col & oneHotBitboard96(index);
+    Bitboard96 _fill_matrix = _available_in_row & _available_in_col & _available_in_subsquare & oneHotBitboard96(index);
 
     return _fill_matrix != 0;
 }
