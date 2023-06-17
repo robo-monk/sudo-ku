@@ -19,3 +19,8 @@ $(EXECUTABLE): $(OBJECTS)
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
+
+$(OBJECTS): | $(OUTPUT_DIR)
+
+$(OUTPUT_DIR):
+	mkdir -p $(OUTPUT_DIR)

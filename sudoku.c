@@ -17,6 +17,21 @@ void pprint_bitboard81(Bitboard96 bb)
 
 static Bitboard96 cachedRowBitboards[9];
 static Bitboard96 cachedColBitboards[9];
+static Bitboard96 cachedSubsquareBitboards[9];
+
+int get_row_from_index(int i)
+{
+    return floor(i / 9);
+}
+
+int get_col_from_index(int i)
+{
+    return i % 9;
+}
+
+Bitboard96 subsquare_bitboard(int subsquare_index) {
+    return cachedSubsquareBitboards[subsquare_index];
+}
 
 Bitboard96 row_bitboard(int row_index)
 {
@@ -47,24 +62,40 @@ Bitboard96 _col_bitboard(int col_index)
     return bb;
 }
 
+int get_subsquare_index(int square_index) {
+    int row = get_row_from_index(square_index);
+    int col = get_col_from_index(square_index);
+    return (row % 3) * 3 + (col % 3);
+}
+
+Bitboard96 _subsquare_bitboard(int subsquare_index) {
+    int starting_row = (subsquare_index / 3) * 3;
+    int starting_col = (subsquare_index % 3) * 3;
+
+    Bitboard96 row_merge = newBitboard96();
+    Bitboard96 col_merge = newBitboard96();
+
+    for (int i = 0; i < 3; i++) {
+        row_merge |= _row_bitboard(starting_row+i);
+        col_merge |= _col_bitboard(starting_col+i);
+    }
+
+    return row_merge & col_merge;
+}
+
 void initializeCache()
 {
     for (int i = 0; i < 9; i++)
     {
         cachedRowBitboards[i] = _row_bitboard(i);
         cachedColBitboards[i] = _col_bitboard(i);
+        cachedSubsquareBitboards[i] = _subsquare_bitboard(i);
+        printf("- subgrid: %u -\n", i);
+        pprint_bitboard81(_subsquare_bitboard(i));
     }
 }
 
-int get_row_from_index(int i)
-{
-    return floor(i / 9);
-}
 
-int get_col_from_index(int i)
-{
-    return i % 9;
-}
 
 // TODO: move to bitboard.c
 int count_ones(__int128 num)
