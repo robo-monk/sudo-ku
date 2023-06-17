@@ -65,9 +65,13 @@ Bitboard96 _col_bitboard(int col_index)
 
 int get_subgrid_index(int square_index)
 {
-    int row = get_row_from_index(square_index);
-    int col = get_col_from_index(square_index);
-    return (row % 3) * 3 + (col % 3);
+    int row = square_index / 9;
+    int col = square_index % 9;
+
+    int subgrid_row = row / 3;
+    int subgrid_col = col / 3;
+
+    return subgrid_row * 3 + subgrid_col;
 }
 
 Bitboard96 _subgrid_bitboard(int subgrid_index)
@@ -137,43 +141,80 @@ int is_solved(Sudoku *sudoku)
     return 0;
 }
 
-int can_be_placed(Sudoku *sudoku, int index, int N)
-{
+void _fill_matrix_for_n(Sudoku *sudoku, int N, Bitboard96 *result) {
     Bitboard96 _available_squares = ~(sudoku->boards[N]);
     Bitboard96 _available_in_row = get_available_rows(&_available_squares);
     Bitboard96 _available_in_col = get_available_cols(&_available_squares);
     Bitboard96 _available_in_subgrid = get_available_subgrids(&_available_squares);
-    Bitboard96 _fill_matrix = _available_in_row & _available_in_col & _available_in_subgrid & oneHotBitboard96(index);
-    return _fill_matrix != 0;
+    *result = _available_in_row & _available_in_col & _available_in_subgrid;
+}
+
+// int can_be_placed(Sudoku *sudoku, int index, int N)
+// {
+//     return (*get_fill_matrix_for_n(sudoku, N) & oneHotBitboard96(index)) != 0;
+// }
+
+
+void fill_number(Sudoku *sudoku, int N, int index)
+{
+    set_bit(&sudoku->boards[N], index);
+    clear_bit(&sudoku->empty, index);
+
+    // TODO only make this for affected numbers
+    // get the row, col and subgrid and rem from the fill matrix of n
+    int row = get_row_from_index(index);
+    int col = get_col_from_index(index);
+    int subgrid = get_subgrid_index(index);
+
+    // Bitboard96 chunk = (row_bitboard(row) | col_bitboard(col) | subgrid_bitboard(subgrid));
+    // pprint_bitboard81(chunk);
+
+    sudoku->fill_matrices[N] &= ~(row_bitboard(row) | col_bitboard(col) | subgrid_bitboard(subgrid));
+    // _fill_matrix_for_n(sudoku, N, &sudoku->fill_matrices[N]);
+}
+
+void erase_number(Sudoku *sudoku, int N, int index)
+{
+    clear_bit(&sudoku->boards[N], index);
+    set_bit(&sudoku->empty, index);
+
+    int row = get_row_from_index(index);
+    int col = get_col_from_index(index);
+    int subgrid = get_subgrid_index(index);
+
+
+    // sudoku->fill_matrices[N] |= (row_bitboard(row) | col_bitboard(col) | subgrid_bitboard(subgrid));
+    // _fill_matrix_for_n(sudoku, N, &sudoku->fill_matrices[N]);
 }
 
 int solve(Sudoku *sudoku)
 {
     if (is_solved(sudoku))
     {
-        printf("\n\n!!!!!!!!!!!!!! solved!!!\n\n");
-        pprint_sudoku(*sudoku);
+
         return 1;
     }
 
     int index_of_first_position = index_of_fist_one(sudoku->empty);
     int current_index = index_of_first_position;
 
-    for (int N = 0; N < 9; N++)
-    {
-        if (can_be_placed(sudoku, current_index, N))
-        {
-            set_bit(&sudoku->boards[N], current_index);
-            clear_bit(&sudoku->empty, current_index);
+    for (int N = 0; N < 9; N++) {
+        Bitboard96 fill_matrix = sudoku->fill_matrices[N];
 
-            int solved = solve(sudoku);
-            if (solved)
+        // if (can_be_placed(sudoku, current_index, N))
+        if (fill_matrix & oneHotBitboard96(current_index))
+        {
+            Bitboard96 og_fill_matrix = sudoku->fill_matrices[N];
+            fill_number(sudoku, N, current_index);
+
+            if (solve(sudoku))
             {
+
                 return 1;
             }
 
-            clear_bit(&sudoku->boards[N], current_index);
-            set_bit(&sudoku->empty, current_index);
+            erase_number(sudoku, N, current_index);
+            sudoku->fill_matrices[N] = og_fill_matrix;
         }
     }
     return 0;
@@ -197,15 +238,19 @@ Sudoku newSudoku()
     return sudoku;
 }
 
-void load_sudoku(char source[], Sudoku *sudoku) {
+void load_sudoku(char source[], Sudoku *sudoku)
+{
     for (int i = 0; source[i] != 0; i++)
     {
         int value = (int)source[i] - 48;
         if (value > 0 && value <= 9)
         {
-            set_bit(&sudoku->boards[value - 1], i);
-            clear_bit(&sudoku->empty, i);
+            fill_number(sudoku, value - 1, i);
         }
+    }
+
+    for (int N = 0; N < 9; N++) {
+        _fill_matrix_for_n(sudoku, N, &sudoku->fill_matrices[N]);
     }
 }
 

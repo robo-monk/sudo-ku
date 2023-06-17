@@ -8,6 +8,7 @@ typedef struct
 {
     Bitboard96 boards[9];
     Bitboard96 empty;
+    Bitboard96 fill_matrices[9];
 } Sudoku;
 
 int solve(Sudoku *sudoku);
