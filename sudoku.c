@@ -197,6 +197,18 @@ Sudoku newSudoku()
     return sudoku;
 }
 
+void load_sudoku(char source[], Sudoku *sudoku) {
+    for (int i = 0; source[i] != 0; i++)
+    {
+        int value = (int)source[i] - 48;
+        if (value > 0 && value <= 9)
+        {
+            set_bit(&sudoku->boards[value - 1], i);
+            clear_bit(&sudoku->empty, i);
+        }
+    }
+}
+
 void pprint_sudoku(Sudoku sudoku)
 {
     printf("\u256D⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯-\u256E\n");

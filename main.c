@@ -28,26 +28,14 @@ int main()
 
     Sudoku sudoku = newSudoku();
 
-    char source[] = "800000000003600000070090200050007000000045700000100030001000068008500010090000400";
+    // char source[] = "800000000003600000070090200050007000000045700000100000001000068000500010090000400";
+    char source[] = "000000002001000700030050090000006040003040800040509000090060030002000100700003000";
+    load_sudoku(source, &sudoku);
     // char source[] = "5...8..49...5...3..673....115..........2.8..........187....415..3...2...49..5...3";
     // char source[] = "...4....7.98..7...7.3128....15.....82.......68.....53....5648.1...9..47.5....1...";
 
     // char source[] = "300000000500000700007029501200005080900860100850000043000047050692351070705000019";
-    int len = strlen(source);
-    for (int i = 0; source[i] != 0; i++)
-    {
-        // break;
-        // printf("%c", source[i]);
-        int value = (int)source[i] - 48;
-        if (value > 0 && value <= 9)
-        {
-            set_bit(&sudoku.boards[value - 1], i);
-            clear_bit(&sudoku.empty, i);
-        }
-        // printf("%u\n", );
-        // set_bit(&sudoku.boards[i], i * 9 + i);
-        // clear_bit(&sudoku.empty, i * 9 + i);
-    }
+    
 
     // return 1;
     pprint_sudoku(sudoku);

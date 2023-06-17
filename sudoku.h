@@ -1,19 +1,18 @@
-#ifndef SUDOKU_H 
-#define SUDOKU_H 
+#ifndef SUDOKU_H
+#define SUDOKU_H
 
 #include <stdint.h>
 #include "bitboard.h"
 
-typedef struct {
+typedef struct
+{
     Bitboard96 boards[9];
     Bitboard96 empty;
 } Sudoku;
 
-
-// Sudoku* solve(Sudoku *sudoku);
 int solve(Sudoku *sudoku);
 void pprint_sudoku(Sudoku sudoku);
+void load_sudoku(char source[], Sudoku *sudoku);
 Sudoku newSudoku();
-
 
 #endif /* SUDOKU_H */
