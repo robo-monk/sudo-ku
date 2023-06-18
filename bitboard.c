@@ -12,9 +12,7 @@ Bitboard96 newBitboard96()
 
 Bitboard96 oneHotBitboard96(int hot_index)
 {
-    Bitboard96 board = newBitboard96();
-    set_bit(&board, hot_index);
-    return board;
+    return (Bitboard96)1 << hot_index;
 }
 
 int is_empty(Bitboard96 *bb)

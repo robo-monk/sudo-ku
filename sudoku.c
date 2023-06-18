@@ -141,7 +141,8 @@ int is_solved(Sudoku *sudoku)
     return 0;
 }
 
-void _fill_matrix_for_n(Sudoku *sudoku, int N, Bitboard96 *result) {
+void _fill_matrix_for_n(Sudoku *sudoku, int N, Bitboard96 *result)
+{
     Bitboard96 _available_squares = ~(sudoku->boards[N]);
     Bitboard96 _available_in_row = get_available_rows(&_available_squares);
     Bitboard96 _available_in_col = get_available_cols(&_available_squares);
@@ -153,7 +154,6 @@ void _fill_matrix_for_n(Sudoku *sudoku, int N, Bitboard96 *result) {
 // {
 //     return (*get_fill_matrix_for_n(sudoku, N) & oneHotBitboard96(index)) != 0;
 // }
-
 
 void fill_number(Sudoku *sudoku, int N, int index)
 {
@@ -181,7 +181,6 @@ void erase_number(Sudoku *sudoku, int N, int index)
     int row = get_row_from_index(index);
     int col = get_col_from_index(index);
     int subgrid = get_subgrid_index(index);
-
 
     // sudoku->fill_matrices[N] |= (row_bitboard(row) | col_bitboard(col) | subgrid_bitboard(subgrid));
     // _fill_matrix_for_n(sudoku, N, &sudoku->fill_matrices[N]);
@@ -216,20 +215,16 @@ int compare(const void *a, const void *b)
     return pair_a->set_bits - pair_b->set_bits;
 }
 
-int solve(Sudoku *sudoku)
+// organizes the bitboards based on the least filled matrices (thus the least possible solutions)
+int *get_order_for_ns(Sudoku *sudoku)
 {
-    if (is_solved(sudoku))
-    {
-        return 1;
-    }
+    // int order[9];
+    int *order = (int *)malloc(9 * sizeof(int));
 
-    int index_of_first_position = index_of_fist_one(sudoku->empty);
-    int current_index = index_of_first_position;
-
-    int order[9];
     Pair pairs[9];
 
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < 9; i++)
+    {
         Bitboard96 fill_matrix = sudoku->fill_matrices[i];
         int ones = count_ones(fill_matrix);
         pairs[i].index = i;
@@ -243,13 +238,27 @@ int solve(Sudoku *sudoku)
         order[i] = pairs[i].index;
     }
 
-    for (int i = 0; i < 9; i++) {
+    return order;
+}
+
+int solve(Sudoku *sudoku)
+{
+    if (is_solved(sudoku))
+    {
+        return 1;
+    }
+
+    int index_of_first_position = index_of_fist_one(sudoku->empty);
+    int current_index = index_of_first_position;
+
+    int *order = get_order_for_ns(sudoku);
+
+    for (int i = 0; i < 9; i++)
+    {
         int N = order[i];
-        // printf("%u\n", N);
         Bitboard96 fill_matrix = sudoku->fill_matrices[N];
 
-        // if (can_be_placed(sudoku, current_index, N))
-        if (fill_matrix & oneHotBitboard96(current_index))
+        if (fill_matrix > 0 && fill_matrix & oneHotBitboard96(current_index))
         {
             Bitboard96 og_fill_matrix = sudoku->fill_matrices[N];
             fill_number(sudoku, N, current_index);
@@ -264,6 +273,7 @@ int solve(Sudoku *sudoku)
             sudoku->fill_matrices[N] = og_fill_matrix;
         }
     }
+
     return 0;
 }
 
@@ -296,7 +306,8 @@ void load_sudoku(char source[], Sudoku *sudoku)
         }
     }
 
-    for (int N = 0; N < 9; N++) {
+    for (int N = 0; N < 9; N++)
+    {
         _fill_matrix_for_n(sudoku, N, &sudoku->fill_matrices[N]);
     }
 }
