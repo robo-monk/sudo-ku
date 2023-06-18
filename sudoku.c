@@ -8,16 +8,16 @@
 #include <unistd.h>
 
 // move to bitboard.c
-void pprint_bitboard81(Bitboard96 bb)
+void pprint_bitboard81(Bitboard128 bb)
 {
     printf("\n");
-    pprint_bitboard96(bb, '*', 0, 81, 9);
+    pprint_bitboard128(bb, '*', 0, 81, 9);
     printf("\n");
 }
 
-static Bitboard96 cachedRowBitboards[9];
-static Bitboard96 cachedColBitboards[9];
-static Bitboard96 cachedSubgridBitboards[9];
+static Bitboard128 cachedRowBitboards[9];
+static Bitboard128 cachedColBitboards[9];
+static Bitboard128 cachedSubgridBitboards[9];
 
 int get_row_from_index(int i)
 {
@@ -29,23 +29,23 @@ int get_col_from_index(int i)
     return i % 9;
 }
 
-Bitboard96 subgrid_bitboard(int subgrid_index)
+Bitboard128 subgrid_bitboard(int subgrid_index)
 {
     return cachedSubgridBitboards[subgrid_index];
 }
 
-Bitboard96 row_bitboard(int row_index)
+Bitboard128 row_bitboard(int row_index)
 {
     return cachedRowBitboards[row_index];
 }
-Bitboard96 col_bitboard(int col_index)
+Bitboard128 col_bitboard(int col_index)
 {
     return cachedColBitboards[col_index];
 }
 
-Bitboard96 _row_bitboard(int row_index)
+Bitboard128 _row_bitboard(int row_index)
 {
-    Bitboard96 bb = newBitboard96();
+    Bitboard128 bb = newBitboard96();
     for (int i = row_index * 9; i < (row_index + 1) * 9; i++)
     {
         set_bit(&bb, i);
@@ -53,9 +53,9 @@ Bitboard96 _row_bitboard(int row_index)
     return bb;
 }
 
-Bitboard96 _col_bitboard(int col_index)
+Bitboard128 _col_bitboard(int col_index)
 {
-    Bitboard96 bb = newBitboard96();
+    Bitboard128 bb = newBitboard96();
     for (int i = col_index; i < 81; i += 9)
     {
         set_bit(&bb, i);
@@ -74,13 +74,13 @@ int get_subgrid_index(int square_index)
     return subgrid_row * 3 + subgrid_col;
 }
 
-Bitboard96 _subgrid_bitboard(int subgrid_index)
+Bitboard128 _subgrid_bitboard(int subgrid_index)
 {
     int starting_row = (subgrid_index / 3) * 3;
     int starting_col = (subgrid_index % 3) * 3;
 
-    Bitboard96 row_merge = newBitboard96();
-    Bitboard96 col_merge = newBitboard96();
+    Bitboard128 row_merge = newBitboard96();
+    Bitboard128 col_merge = newBitboard96();
 
     for (int i = 0; i < 3; i++)
     {
@@ -101,13 +101,13 @@ void initializeCache()
     }
 }
 
-Bitboard96 mask_available_serially(Bitboard96 *bb, Bitboard96 (*entity_bitboard)(int))
+Bitboard128 mask_available_serially(Bitboard128 *bb, Bitboard128 (*entity_bitboard)(int))
 {
-    Bitboard96 result = 0;
+    Bitboard128 result = 0;
     for (int i = 0; i < 9; i++)
     {
-        Bitboard96 _mask = entity_bitboard(i);
-        Bitboard96 available = _mask & *bb;
+        Bitboard128 _mask = entity_bitboard(i);
+        Bitboard128 available = _mask & *bb;
         if (count_ones(available) == 9)
         {
             result |= available;
@@ -117,17 +117,17 @@ Bitboard96 mask_available_serially(Bitboard96 *bb, Bitboard96 (*entity_bitboard)
     return result;
 }
 
-Bitboard96 get_available_rows(Bitboard96 *bb)
+Bitboard128 get_available_rows(Bitboard128 *bb)
 {
     return mask_available_serially(bb, row_bitboard);
 }
 
-Bitboard96 get_available_cols(Bitboard96 *bb)
+Bitboard128 get_available_cols(Bitboard128 *bb)
 {
     return mask_available_serially(bb, col_bitboard);
 }
 
-Bitboard96 get_available_subgrids(Bitboard96 *bb)
+Bitboard128 get_available_subgrids(Bitboard128 *bb)
 {
     return mask_available_serially(bb, subgrid_bitboard);
 }
@@ -141,49 +141,31 @@ int is_solved(Sudoku *sudoku)
     return 0;
 }
 
-void _fill_matrix_for_n(Sudoku *sudoku, int N, Bitboard96 *result)
+void _fill_matrix_for_n(Sudoku *sudoku, int N, Bitboard128 *result)
 {
-    Bitboard96 _available_squares = ~(sudoku->boards[N]);
-    Bitboard96 _available_in_row = get_available_rows(&_available_squares);
-    Bitboard96 _available_in_col = get_available_cols(&_available_squares);
-    Bitboard96 _available_in_subgrid = get_available_subgrids(&_available_squares);
+    Bitboard128 _available_squares = ~(sudoku->boards[N]);
+    Bitboard128 _available_in_row = get_available_rows(&_available_squares);
+    Bitboard128 _available_in_col = get_available_cols(&_available_squares);
+    Bitboard128 _available_in_subgrid = get_available_subgrids(&_available_squares);
     *result = _available_in_row & _available_in_col & _available_in_subgrid;
 }
-
-// int can_be_placed(Sudoku *sudoku, int index, int N)
-// {
-//     return (*get_fill_matrix_for_n(sudoku, N) & oneHotBitboard96(index)) != 0;
-// }
 
 void fill_number(Sudoku *sudoku, int N, int index)
 {
     set_bit(&sudoku->boards[N], index);
     clear_bit(&sudoku->empty, index);
 
-    // TODO only make this for affected numbers
-    // get the row, col and subgrid and rem from the fill matrix of n
     int row = get_row_from_index(index);
     int col = get_col_from_index(index);
     int subgrid = get_subgrid_index(index);
 
-    // Bitboard96 chunk = (row_bitboard(row) | col_bitboard(col) | subgrid_bitboard(subgrid));
-    // pprint_bitboard81(chunk);
-
     sudoku->fill_matrices[N] &= ~(row_bitboard(row) | col_bitboard(col) | subgrid_bitboard(subgrid));
-    // _fill_matrix_for_n(sudoku, N, &sudoku->fill_matrices[N]);
 }
 
 void erase_number(Sudoku *sudoku, int N, int index)
 {
     clear_bit(&sudoku->boards[N], index);
     set_bit(&sudoku->empty, index);
-
-    int row = get_row_from_index(index);
-    int col = get_col_from_index(index);
-    int subgrid = get_subgrid_index(index);
-
-    // sudoku->fill_matrices[N] |= (row_bitboard(row) | col_bitboard(col) | subgrid_bitboard(subgrid));
-    // _fill_matrix_for_n(sudoku, N, &sudoku->fill_matrices[N]);
 }
 
 void bubble_sort(int arr[], int n)
@@ -225,7 +207,7 @@ int *get_order_for_ns(Sudoku *sudoku)
 
     for (int i = 0; i < 9; i++)
     {
-        Bitboard96 fill_matrix = sudoku->fill_matrices[i];
+        Bitboard128 fill_matrix = sudoku->fill_matrices[i];
         int ones = count_ones(fill_matrix);
         pairs[i].index = i;
         pairs[i].set_bits = ones;
@@ -256,11 +238,11 @@ int solve(Sudoku *sudoku)
     for (int i = 0; i < 9; i++)
     {
         int N = order[i];
-        Bitboard96 fill_matrix = sudoku->fill_matrices[N];
+        Bitboard128 fill_matrix = sudoku->fill_matrices[N];
 
         if (fill_matrix > 0 && fill_matrix & oneHotBitboard96(current_index))
         {
-            Bitboard96 og_fill_matrix = sudoku->fill_matrices[N];
+            Bitboard128 og_fill_matrix = sudoku->fill_matrices[N];
             fill_number(sudoku, N, current_index);
 
             if (solve(sudoku))

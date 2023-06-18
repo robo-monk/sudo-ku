@@ -4,18 +4,18 @@
 #include "bitboard.h"
 #include <time.h>
 
-Bitboard96 newBitboard96()
+Bitboard128 newBitboard96()
 {
-    Bitboard96 board = 0;
+    Bitboard128 board = 0;
     return board;
 }
 
-Bitboard96 oneHotBitboard96(int hot_index)
+Bitboard128 oneHotBitboard96(int hot_index)
 {
-    return (Bitboard96)1 << hot_index;
+    return (Bitboard128)1 << hot_index;
 }
 
-int is_empty(Bitboard96 *bb)
+int is_empty(Bitboard128 *bb)
 {
     return bb == 0;
 }
@@ -66,34 +66,34 @@ int highest_set_bit(__int128 num)
     return 127 - position;
 }
 
-int index_of_fist_one(Bitboard96 bb)
+int index_of_fist_one(Bitboard128 bb)
 {
     return lowest_set_bit(bb);
 }
 
-void set_bit(Bitboard96 *board, int index)
+void set_bit(Bitboard128 *board, int index)
 {
     *board |= (__int128_t)1 << index;
 }
 
-void clear_bit(Bitboard96 *board, int index)
+void clear_bit(Bitboard128 *board, int index)
 {
 
     *board &= ~((__int128_t)1 << index);
 }
 
-int is_bit_set(Bitboard96 *board, int index)
+int is_bit_set(Bitboard128 *board, int index)
 {
     return (*board & ((__int128_t)1 << index)) != 0;
 }
 
-void fill_with_noise(Bitboard96 *board)
+void fill_with_noise(Bitboard128 *board)
 {
     // TODO implement
     board = (__int128_t)rand() << 32 | rand();
 }
 
-int count_ones(Bitboard96 num)
+int count_ones(Bitboard128 num)
 {
     int count = 0;
 
@@ -106,7 +106,7 @@ int count_ones(Bitboard96 num)
     return count;
 }
 
-void pprint_bitboard96(Bitboard96 board, char symbol, int start, int end, int cols)
+void pprint_bitboard128(Bitboard128 board, char symbol, int start, int end, int cols)
 {
     int row_index = 0;
     for (int i = start; i < end; i++)
