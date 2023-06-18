@@ -187,18 +187,65 @@ void erase_number(Sudoku *sudoku, int N, int index)
     // _fill_matrix_for_n(sudoku, N, &sudoku->fill_matrices[N]);
 }
 
+void bubble_sort(int arr[], int n)
+{
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = 0; j < n - i - 1; j++)
+        {
+            if (arr[j] > arr[j + 1])
+            {
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+}
+
+typedef struct
+{
+    int index;
+    int set_bits;
+} Pair;
+
+int compare(const void *a, const void *b)
+{
+    Pair *pair_a = (Pair *)a;
+    Pair *pair_b = (Pair *)b;
+    return pair_a->set_bits - pair_b->set_bits;
+}
+
 int solve(Sudoku *sudoku)
 {
     if (is_solved(sudoku))
     {
-
         return 1;
     }
 
     int index_of_first_position = index_of_fist_one(sudoku->empty);
     int current_index = index_of_first_position;
 
-    for (int N = 0; N < 9; N++) {
+    int order[9];
+    Pair pairs[9];
+
+    for (int i = 0; i < 9; i++) {
+        Bitboard96 fill_matrix = sudoku->fill_matrices[i];
+        int ones = count_ones(fill_matrix);
+        pairs[i].index = i;
+        pairs[i].set_bits = ones;
+    }
+
+    qsort(pairs, 9, sizeof(Pair), compare);
+
+    for (int i = 0; i < 9; i++)
+    {
+        order[i] = pairs[i].index;
+    }
+
+    for (int i = 0; i < 9; i++) {
+        int N = order[i];
+        // printf("%u\n", N);
         Bitboard96 fill_matrix = sudoku->fill_matrices[N];
 
         // if (can_be_placed(sudoku, current_index, N))
@@ -292,29 +339,3 @@ void pprint_sudoku(Sudoku sudoku)
 
     printf("\u2570-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯-\u256F\n");
 }
-
-// void pprint_sudoku(Sudoku sudoku)
-// {
-//     for (int yy = 0; yy < 9; yy++)
-//     {
-//         for (int xx = 0; xx < 9; xx++)
-//         {
-//             int is_empty = 1;
-//             for (int n = 0; n < 9; n++)
-//             {
-//                 if (is_bit_set(&sudoku.boards[n], yy * 9 + xx) == 1)
-//                 {
-//                     printf(" %u ", n + 1);
-//                     is_empty = 0;
-//                     break;
-//                 }
-//             }
-
-//             if (is_empty == 1)
-//             {
-//                 printf(" _ ");
-//             }
-//         }
-//         printf("\n");
-//     }
-// }
